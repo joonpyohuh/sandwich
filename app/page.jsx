@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {motion,useInView,useReducedMotion,useScroll,useTransform} from 'framer-motion';
+import {motion,useInView,useScroll,useTransform} from 'framer-motion';
 import IngredientStack from './IngredientStack';
 import NaverMap from './NaverMap';
 const ease=[.22,1,.36,1];
@@ -12,15 +12,15 @@ const pantry=[{id:'ciabatta',en:'CIABATTA',ko:'곡물 치아바타',tag:HAND},{i
 const tagKo={[HAND]:'수제',[NATURAL]:'자연 그대로'};
 const promise=[{label:'SANDWICH',lines:['샌드위치 빵은 방부제와 개량제가 들어가지 않은','곡물 치아바타를 매장에서 소량만 만들어 사용합니다.','샌드위치 안에 들어가는 토핑부터 소스, 피클까지','직접 만들어 가장 건강한 샌드위치를 제공해드리기','위해 노력하고 있습니다.']},{label:'PASTA',lines:['파스타면은 최고급 파스타면인','데체코의 스파게티니를 사용합니다.','특유의 비법 육수를 사용하는 파스타는','여러분의 맛과 건강을 우선으로 하고 있습니다.']},{label:'COFFEE',lines:['커피의 원두는 호주 로스팅 대회에서 입상한','“블랙시드 커피”의 원두를 사용하여','최고의 커피를 제공하고 있습니다.']}];
 function ScrollLine({progress,range,children}){const opacity=useTransform(progress,range,[.12,1]);const y=useTransform(progress,range,[12,0]);return <motion.span className="promise-line" style={{opacity,y}}>{children}</motion.span>}
-function ScrollLines({label,lines}){const ref=useRef(null);const reduced=useReducedMotion();const {scrollYProgress}=useScroll({target:ref,offset:['start 0.9','end 0.55']});
+function ScrollLines({label,lines}){const ref=useRef(null);const reduced=false;const {scrollYProgress}=useScroll({target:ref,offset:['start 0.9','end 0.55']});
 return <div ref={ref} className="promise-block"><span className="promise-label">{label}</span><p>{lines.map((l,i)=>reduced?<span key={i} className="promise-line">{l}</span>:<ScrollLine key={i} progress={scrollYProgress} range={[i/lines.length,(i+1)/lines.length]}>{l}</ScrollLine>)}</p></div>}
 const lineV={hidden:{y:'110%'},show:{y:0,transition:{duration:1.1,ease}}};
 const fadeV={hidden:{opacity:0,y:18,filter:'blur(6px)'},show:{opacity:1,y:0,filter:'blur(0px)',transition:{duration:1.2,ease}}};
 const Line=({children})=><span className="line"><motion.span variants={lineV}>{children}</motion.span></span>;
-function TypeText({text}){const ref=useRef(null);const inView=useInView(ref,{once:true,amount:.8});const reduced=useReducedMotion();const [n,setN]=useState(0);
+function TypeText({text}){const ref=useRef(null);const inView=useInView(ref,{once:true,amount:.8});const reduced=false;const [n,setN]=useState(0);
 useEffect(()=>{if(!inView)return;if(reduced){setN(text.length);return}let id;const start=setTimeout(()=>{let i=0;id=setInterval(()=>{i++;setN(i);if(i>=text.length)clearInterval(id)},110)},400);return()=>{clearTimeout(start);clearInterval(id)}},[inView,reduced,text]);
 return <span ref={ref} aria-hidden="true">{text.slice(0,n)}</span>}
-export default function Page(){const [loaded,setLoaded]=useState(false);const journeyRef=useRef(null);const reduced=useReducedMotion();
+export default function Page(){const [loaded,setLoaded]=useState(false);const journeyRef=useRef(null);const reduced=false;
 useEffect(()=>{const t=setTimeout(()=>setLoaded(true),1300);return()=>clearTimeout(t)},[]);
 const reveal={initial:reduced?false:{opacity:.15,y:55},whileInView:{opacity:1,y:0},viewport:{once:true,amount:.2},transition:{duration:reduced?0:.9,ease}};
 const stagger=(gap,delay=0)=>({show:{transition:{staggerChildren:gap,delayChildren:delay}}});
@@ -30,7 +30,7 @@ return <><div className={'loader '+(loaded?'done':'')} aria-hidden="true"><img c
 <div className="journey" ref={journeyRef}><div className="story-content">
 <motion.section id="story" className="story section" {...reveal}><span className="eyebrow">01 / OUR LITTLE FACTORY</span><h2>한 끼를,<br/><em>대충 만들지 않습니다.</em></h2><p>샌드위치와 파스타를 만드는 구리의 작은 공간입니다.<br/>보이지 않는 곳까지, 정성을 넣어 만듭니다.</p><p>좋아하는 사람과 마주 앉아<br/>천천히 드시고 가세요.</p></motion.section>
 <motion.section id="handmade" className="section handmade" {...reveal}><span className="eyebrow">02 / ALL HANDMADE</span><h2>처음부터 끝까지,<br/><em>전부 손으로 만듭니다.</em></h2><ol className="made-list">{made.map((m,i)=><motion.li key={m.en} initial={reduced?false:{opacity:0,y:30}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.6}} transition={{duration:reduced?0:1,ease,delay:reduced?0:i*.12}}><motion.span className="made-rule" initial={reduced?false:{scaleX:0}} whileInView={{scaleX:1}} viewport={{once:true,amount:.6}} transition={{duration:reduced?0:1.4,ease,delay:reduced?0:i*.12}}/><span className="made-no">0{i+1}</span><div><h3>{m.ko}</h3><p>{m.text}</p></div><span className="made-en">{m.en}</span></motion.li>)}</ol></motion.section>
-<motion.section id="ingredients" className="section ingredients" {...reveal}><span className="eyebrow">03 / WHAT GOES IN</span><h2>들어가는 재료는<br/><em>자연 그대로, 혹은 손으로.</em></h2><ul className="pantry">{pantry.map((p,i)=><motion.li key={p.id} initial={reduced?false:{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.4}} transition={{duration:reduced?0:1,ease,delay:reduced?0:(i%3)*.1}}><div className="pantry-tile"><span>{p.en}</span><img src={'/ingredients/'+p.id+'.png'} alt="" loading="lazy" onError={e=>{e.currentTarget.hidden=true}}/></div><div className="pantry-meta"><strong>{p.ko}</strong><em className={p.tag===HAND?'hand':'natural'}>{tagKo[p.tag]}</em></div></motion.li>)}</ul><p className="pantry-legend"><em className="hand">수제</em> 매장에서 직접 만듭니다 <em className="natural">자연 그대로</em> 손대지 않은 원재료 그대로</p></motion.section>
+<motion.section id="ingredients" className="section ingredients" {...reveal}><span className="eyebrow">03 / WHAT GOES IN</span><h2>들어가는 재료는<br/><em>자연 그대로, 혹은 손으로.</em></h2><ul className="pantry">{pantry.map((p,i)=><motion.li key={p.id} initial={reduced?false:{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.4}} transition={{duration:reduced?0:1,ease,delay:reduced?0:(i%3)*.1}}><div className={'pantry-tile ingredient-photo ingredient-'+p.id} role="img" aria-label={p.ko}/><div className="pantry-meta"><strong>{p.ko}</strong><em className={p.tag===HAND?'hand':'natural'}>{tagKo[p.tag]}</em></div></motion.li>)}</ul><p className="pantry-legend"><em className="hand">수제</em> 매장에서 직접 만듭니다 <em className="natural">자연 그대로</em> 손대지 않은 원재료 그대로</p></motion.section>
 <section id="promise" className="section promise"><span className="eyebrow">04 / OUR PROMISE</span><h2>정직하게 고르고,<br/><em>정성껏 만듭니다.</em></h2>{promise.map(b=><ScrollLines key={b.label} {...b}/>)}<p className="menu-note">전체 메뉴와 가격은 곧 소개할게요.<br/>메뉴 문의는 <a href="tel:01063391118">010-6339-1118 ↗</a></p></section>
 <motion.section className="section space" {...reveal}><span className="eyebrow">05 / STAY A LITTLE LONGER</span><h2>취향이 모이는 곳.<br/><em>이야기가 쌓이는 곳.</em></h2><p>곳곳에 담긴 작은 취향들.<br/>음식만큼이나 오래 기억되는 공간이길.</p></motion.section>
 </div><aside className="stack"><IngredientStack journeyRef={journeyRef}/></aside></div>
