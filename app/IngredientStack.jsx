@@ -37,6 +37,7 @@ export default function IngredientStack({journeyRef}) {
     const update=()=>{
       const rect=journeyRef.current.getBoundingClientRect();
       target=scrollProgress(rect.top,rect.height,innerHeight);
+      scene.style.opacity=rect.top<innerHeight*.85 && rect.bottom>innerHeight*.35 ? 1 : 0;
       if(!frame)frame=requestAnimationFrame(tick);
     };
     const observer=new ResizeObserver(update);observer.observe(journeyRef.current);
@@ -46,3 +47,4 @@ export default function IngredientStack({journeyRef}) {
   },[journeyRef]);
   return <div ref={root} className="ingredient-scene"><span className="ingredient-kicker">SCROLL TO MAKE YOUR SANDWICH</span><div className="ingredient-stage" role="img" aria-label="스크롤하면 빵, 채소, 토마토, 치즈, 햄, 윗빵이 하나씩 내려앉습니다"><div className="plate"/>{ingredients.map(([name,shape],i)=><svg key={name} data-layer={i} viewBox="0 0 300 115" style={{bottom:20+i*33,zIndex:i+1,opacity:0}} aria-hidden="true"><g stroke="#173f2b" strokeWidth="2.5" strokeLinejoin="round">{shape}</g></svg>)}</div><span className="ingredient-label" data-label>HANDMADE BREAD / 수제 빵</span><div className="stack-meter"><span data-meter/></div><strong>MADE<br/>BY HAND.</strong><small>스크롤할 때마다, 한 겹씩 ↓</small></div>
 }
+
